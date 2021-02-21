@@ -153,11 +153,11 @@
       "Starters": [
         {
           "Type": "simple",
-          "Value": "how did i install umod"
+          "Value": "how do i install umod"
         },
         {
           "Type": "simple",
-          "Value": "how did i install oxide"
+          "Value": "how do i install oxide"
         }
       ],
       "Answer": "https://docs.linuxgsm.com/commands/mods"
