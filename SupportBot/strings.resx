@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ArkClusters" xml:space="preserve">
+    <value>Ark Clustering
+&lt;https://docs.linuxgsm.com/game-servers/ark-survival-evolved#clusters&gt;</value>
+  </data>
+  <data name="Cronjob" xml:space="preserve">
+    <value>**Cron/CronJob**
+https://docs.linuxgsm.com/configuration/cronjobs</value>
+  </data>
+  <data name="CWorkThreadPool" xml:space="preserve">
+    <value>CWorkThreadPool
+These errors can be safely ignored.</value>
+  </data>
+  <data name="LvmPartitions" xml:space="preserve">
+    <value>**Logical Volume Manager (LVM)**
+It looks like you are using LVM, if this is a virtual machine you probably need to expand the drive as most installations initially only assign a small amount.
+
+The easy way of doing this is to get the name of the volume using `sudo lvs`
+
+You will see something like this:
+```
+ LV        VG          Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+ db        LVMVolGroup -wi-ao----  20.00g
+ projects  LVMVolGroup -wi-ao----  10.00g
+ workspace LVMVolGroup -wi-ao---- 254.99g
+ www       LVMVolGroup -wi-ao----   5.00g
+```
+The important parts are:
+LV = Logical Volume
+VG = Volume Group
+
+To correctly provide the name of the logical volume to expand, you’ll need to give the volume group, followed by a slash, followed by the logical volume:
+
+This example adds 5GB (Alternatively you can use `+100%FREE` to use the entire disk(s))
+```BASH
+sudo lvresize -L +5G --resizefs LVMVolGroup/www
+```</value>
+  </data>
+  <data name="RustCustomMap" xml:space="preserve">
+    <value>**Rust Custom Map**
+
+1. Upload your custom `.map` file to a web accessible server (Or setup apache/nginx on your server and use that)
+
+2. Once uploaded, copy the download link as you will need to add this to the rust config. 
+
+3. Edit your servers config file (Example: `/home/rustserver/lgsm/config-lgsm/rustserver/rustserver.cfg`)
+
+4. Comment out  `params="...` as we will replace it with:
+```BASH
+parms="-batchmode +server.ip ${ip} +server.port ${port} +server.tickrate ${tickrate} +server.hostname \"${servername}\" +server.identity \"${selfname}\" +server.maxplayers ${maxplayers} +server.saveinterval ${saveinterval} +rcon.web ${rconweb} +rcon.ip ${ip} +rcon.port ${rconport} +rcon.password \"${rconpassword}\" -logfile \"${gamelogdate}\" +server.levelurl \"PLACE_URL_HERE\""
+```
+5. Make sure you replace the placeholder at the end of the params with your download link</value>
+  </data>
+  <data name="SelfUpdate" xml:space="preserve">
+    <value>Applying any updates to triggers...</value>
+  </data>
+  <data name="Wsl" xml:space="preserve">
+    <value>Only WSL2 is supported by LinuxGSM, so you need win 10 build 2004 or newer
+You also need to ensure you have Version 2 or Newer of WSL
+&lt;https://docs.linuxgsm.com/support/faq#will-linuxgsm-run-on-linux-for-windows&gt;</value>
+  </data>
+</root>

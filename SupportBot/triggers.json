@@ -1,0 +1,174 @@
+{
+  "Triggers": [
+    {
+      "Name": "0x202",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "0x202"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#write-error-no-space-left-on-device"
+    },
+    {
+      "Name": "0x402",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "0x402"
+        }
+      ],
+      "Answer": "Update required but not completed - check network"
+    },
+    {
+      "Name": "0x402",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "0x402"
+        },
+        {
+          "Type": "simple",
+          "Value": "0x602"
+        }
+      ],
+      "Answer": "Update required but not completed - check network configuration"
+    },
+    {
+      "Name": "Multiple IPs",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "multiple ip addresses found"
+        },
+        {
+          "Type": "simple",
+          "Value": "multiple active network interfaces"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#warn-multiple-active-network-interfaces"
+    },
+    {
+      "Name": "missing dependencies",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "warning! missing dependencies"
+        }
+      ],
+      "Answer": "You appear to have missing dependencies, LinuxGSM will list the command you need to install it at the bottom of the error."
+    },
+    {
+      "Name": "missing dependencies",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "/tmp/tmux-1000/default"
+        }
+      ],
+      "Answer": "This error can be caused by multiple issues, the first thing to test is can you run a tmux session?\n`tmux` - If successful you should have a green bar at the bottom, use `exit` to close it\nIf successful your game server is probably crashing instantly check the log files for any errors."
+    },
+    {
+      "Name": "address binding",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "cannot assign requested address"
+        }
+      ],
+      "Answer": "If your server cannot bind to an address this is usually because something is already using it.\nCheck the usage of ports using `ss -putl | grep :[port]` Change `[port]` to the port you are trying to bind to.\n\nAlternatively you are trying to bind to an address you don't actually have. Double check the IP/Port in the configuration."
+    },
+    {
+      "Name": "tmux missing",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "tmux not installed"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#tmux-command-not-found"
+    },
+    {
+      "Name": "SSL Error",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "unable to establish ssl connection"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#i-cant-download-linuxgsm-sh-tls-ssl-errors"
+    },
+    {
+      "Name": "SSL Error",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "login failure: no connection"
+        }
+      ],
+      "Answer": "This error is **usually** not a problem with linux but the official fix is to allow a bunch of ports.\n\nThis is related to missing iptables rules. You will want something along these lines:\n\n```BASH\niptables -A INPUT -p udp -m udp --sport 27000:27030 --dport 1025:65355 -j ACCEPT\niptables -A INPUT -p udp -m udp --sport 4380 --dport 1025:65355 -j ACCEPT\n```"
+    },
+    {
+      "Name": "no subscription",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "error! failed to install (no subscription)"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/steamcmd/errors#error-failed-to-install-app-less-than-appid_number-greater-than-no-subscription"
+    },
+    {
+      "Name": "32 bit required",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "steamcmd: error while loading shared libraries: libstdc++"
+        }
+      ],
+      "Answer": "Since SteamCMD is a 32-bit binary, 32-bit libraries are required.\nThe resolution depends on your distro:\n\n**Debian based distributions (Ubuntu, Mint, etc.)**\n```BASH\nsudo dpkg --add-architecture i386\nsudo apt-get update\nsudo apt-get install lib32gcc1\n```\n\n**Red Hat based distributions (RHEL, Fedora, CentOS, etc.)**\n```BASH\nyum install glibc.i686 libstdc++.i686\n```"
+    },
+    {
+      "Name": "Ownership issues",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "ownership issues found"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#fail-starting-game-server-ownership-issues-found"
+    },
+    {
+      "Name": "raspberry pi",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "raspberry pi"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/support/faq#will-linuxgsm-run-on-raspberry-pi"
+    },
+    {
+      "Name": "sdl not found",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "sdl not found"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/steamcmd/errors#loading-steam-api-failed-to-init-sdl-priority-manager-sdl-not-found"
+    },
+    {
+      "Name": "mod install",
+      "Starters": [
+        {
+          "Type": "regex",
+          "Value": "\\w\\w++ [on]\\w\\w\\w\\w|(?<= and )\\w++|[metamod]*+\\w\\w[to][do]|(?:install(?= amxmod))++"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/commands/mods"
+    }
+  ]
+}
+
+
