@@ -16,16 +16,6 @@
         {
           "Type": "simple",
           "Value": "0x402"
-        }
-      ],
-      "Answer": "Update required but not completed - check network"
-    },
-    {
-      "Name": "0x402",
-      "Starters": [
-        {
-          "Type": "simple",
-          "Value": "0x402"
         },
         {
           "Type": "simple",
@@ -59,7 +49,7 @@
       "Answer": "You appear to have missing dependencies, LinuxGSM will list the command you need to install it at the bottom of the error."
     },
     {
-      "Name": "missing dependencies",
+      "Name": "tmux 1000",
       "Starters": [
         {
           "Type": "simple",
@@ -99,7 +89,7 @@
       "Answer": "https://docs.linuxgsm.com/support/faq#i-cant-download-linuxgsm-sh-tls-ssl-errors"
     },
     {
-      "Name": "SSL Error",
+      "Name": "steamcmd ports",
       "Starters": [
         {
           "Type": "simple",
@@ -162,8 +152,12 @@
       "Name": "mod install",
       "Starters": [
         {
-          "Type": "regex",
-          "Value": "\\w\\w++ [on]\\w\\w\\w\\w|(?<= and )\\w++|[metamod]*+\\w\\w[to][do]|(?:install(?= amxmod))++"
+          "Type": "simple",
+          "Value": "how did i install umod"
+        },
+        {
+          "Type": "simple",
+          "Value": "how did i install oxide"
         }
       ],
       "Answer": "https://docs.linuxgsm.com/commands/mods"

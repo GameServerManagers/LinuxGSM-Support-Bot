@@ -11,6 +11,8 @@
 // </copyright>
 // <summary></summary>
 // ***********************************************************************
+
+using System;
 using Discord.Commands;
 using SupportBot.Triggers;
 using System.Net;
@@ -59,14 +61,7 @@ namespace SupportBot
         [Command("self-update")]
         public Task SelfUpdate()
         {
-            Task.Run(() =>
-            {
-                using (WebClient client = new WebClient())
-                {
-                    //BotTrigger triggers  = JsonSerializer.Deserialize<BotTrigger>(client.DownloadString(url));
-                    //TODO: Update
-                }
-            });
+            Task.Run(Worker.UpdateTriggers);
 
             return ReplyAsync(strings.SelfUpdate);
         }

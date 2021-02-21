@@ -13,8 +13,10 @@
 // ***********************************************************************
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -50,7 +52,7 @@ namespace SupportBot
         /// Gets or sets the database.
         /// </summary>
         /// <value>The database.</value>
-        public LiteDatabase Database { get; set; }
+        public static LiteDatabase Database { get; set; }
 
         /// <summary>
         /// Gets or sets the settings.
@@ -90,8 +92,8 @@ namespace SupportBot
                 settingStorage.Insert(new BotSettings() { Name = "LinuxGSM Support Bot", AllowedChannels = new ulong[] { 140667754586832896, 135126471319617536, 425089610477993984, 424152809970204672, 219535041468956673 } });
             }
             Settings = settingStorage.FindAll().OrderBy(x => x.Id).Last();
-            
-            //TODO: Check for trigger updates here
+
+            UpdateTriggers();
         }
 
         /// <summary>
@@ -117,6 +119,41 @@ namespace SupportBot
 
                 await Task.Delay(-1, stoppingToken);
                 Database.Dispose();
+            }
+        }
+
+        public static void UpdateTriggers()
+        {
+            try
+            {
+                using var client = new WebClient();
+                var triggers = System.Text.Json.JsonSerializer.Deserialize<BotTrigger>(client.DownloadString(
+                    "https://raw.githubusercontent.com/Grimston/LGSM-SupportBot/master/SupportBot/triggers.json"));
+
+                var triggerCollection = Worker.Database.GetCollection<Trigger>();
+                if (triggers == null) return;
+
+                foreach (var trigger in triggers.Triggers)
+                {
+                    if (triggerCollection.Exists((x) => x.Name == trigger.Name))
+                    {
+                        var storedTrigger = triggerCollection.FindOne(x => x.Name == trigger.Name);
+
+                        storedTrigger.Starters = trigger.Starters;
+                        storedTrigger.Answer = trigger.Answer;
+
+                        triggerCollection.Update(storedTrigger);
+                    }
+                    else
+                    {
+                        triggerCollection.Insert(trigger);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                Debug.Print("Failed to update Triggers!");
+                //Usually this is a temporary issue with GitHub.
             }
         }
 
@@ -161,11 +198,18 @@ namespace SupportBot
                 var canHandle = false;
                 foreach (var starter in item.Starters)
                 {
-                    canHandle = (starter.Type.ToLower()) switch
+                    try
                     {
-                        "regex" => Regex.IsMatch(content, starter.Value),
-                        _ => content.Contains(starter.Value),
-                    };
+                        canHandle = (starter.Type.ToLower()) switch
+                        {
+                            "regex" => Regex.IsMatch(content, starter.Value),
+                            _ => content.Contains(starter.Value),
+                        };
+                    }
+                    catch (Exception)
+                    {
+                        //Ignore it, probably something wrong with the regex..
+                    }
                 }
 
                 if(canHandle)
