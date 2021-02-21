@@ -129,26 +129,11 @@ namespace SupportBot
                 using var client = new WebClient();
                 var triggers = System.Text.Json.JsonSerializer.Deserialize<BotTrigger>(client.DownloadString(
                     "https://raw.githubusercontent.com/Grimston/LGSM-SupportBot/master/SupportBot/triggers.json"));
-
-                var triggerCollection = Worker.Database.GetCollection<Trigger>();
                 if (triggers == null) return;
-
-                foreach (var trigger in triggers.Triggers)
-                {
-                    if (triggerCollection.Exists((x) => x.Name == trigger.Name))
-                    {
-                        var storedTrigger = triggerCollection.FindOne(x => x.Name == trigger.Name);
-
-                        storedTrigger.Starters = trigger.Starters;
-                        storedTrigger.Answer = trigger.Answer;
-
-                        triggerCollection.Update(storedTrigger);
-                    }
-                    else
-                    {
-                        triggerCollection.Insert(trigger);
-                    }
-                }
+                
+                var triggerCollection = Database.GetCollection<Trigger>();
+                triggerCollection.DeleteAll(); //Remove everything
+                triggerCollection.InsertBulk(triggers.Triggers);
             }
             catch (Exception)
             {
