@@ -18,6 +18,7 @@ using SupportBot.Triggers;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Discord;
 
 namespace SupportBot
 {
@@ -59,6 +60,7 @@ namespace SupportBot
         }
 
         [Command("self-update")]
+        [RequireUserPermission(GuildPermission.KickMembers)]
         public Task SelfUpdate()
         {
             Task.Run(Worker.UpdateTriggers);
