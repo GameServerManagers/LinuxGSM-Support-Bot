@@ -177,4 +177,22 @@ parms="-batchmode +server.ip ${ip} +server.port ${port} +server.tickrate ${tickr
 You also need to ensure you have Version 2 or Newer of WSL
 &lt;https://docs.linuxgsm.com/support/faq#will-linuxgsm-run-on-linux-for-windows&gt;</value>
   </data>
+  <data name="Help" xml:space="preserve">
+    <value>**Command List**
+Builds a chown command
+`#cb chown [username]`
+
+Link to the WSL 
+`#wsl` 
+
+Explain how to resize LVM storage
+`#lvmsize`
+
+Checks with steam to see what it can see
+`#check-steam [address]`
+
+Checks to see if a port is open
+`#check-port [address] [port] [(tcp/udp)]`
+UDP checking is not reliable, if it says Closed, something is specifically responding (Firewall). A TimeOut is expected output for UDP normally.</value>
+  </data>
 </root>

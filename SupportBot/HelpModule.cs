@@ -67,5 +67,15 @@ namespace SupportBot
 
             return ReplyAsync(strings.SelfUpdate);
         }
+        
+        /// <summary>
+        /// Help command to show all available commands
+        /// </summary>
+        /// <returns>Task.</returns>
+        [Command("help")]
+        public Task Help()
+        {
+            return ReplyAsync(strings.Help);
+        }
     }
 }

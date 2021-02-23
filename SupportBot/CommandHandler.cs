@@ -1,10 +1,10 @@
 ﻿// ***********************************************************************
 // Assembly         : SupportBot
-// Author           : Grimston
+// Author           : Nathan Pipes
 // Created          : 01-24-2020
 //
-// Last Modified By : Grimston
-// Last Modified On : 02-20-2021
+// Last Modified By : Nathan Pipes
+// Last Modified On : 02-23-2021
 // ***********************************************************************
 // <copyright file="CommandHandler.cs" company="NPipes">
 //     Copyright (c) NPipes. All rights reserved.
@@ -56,7 +56,7 @@ namespace SupportBot
         public async Task InstallCommandsAsync()
         {
             _client.MessageReceived += HandleCommandAsync;
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _services);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace SupportBot
                 return;
             }
 
-            int argPos = 0;
+            var argPos = 0;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             if (!(message.HasCharPrefix('#', ref argPos) ||
@@ -81,7 +81,6 @@ namespace SupportBot
                 message.Author.IsBot)
                 return;
             
-
             // Create a WebSocket-based command context based on the message
             var context = new SocketCommandContext(_client, message);
 
@@ -91,16 +90,12 @@ namespace SupportBot
             // Keep in mind that result does not indicate a return value
             // rather an object stating if the command executed successfully.
             var result = await _commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: null);
+                context,
+                argPos,
+                null);
 
-            // Optionally, we may inform the user if the command fails
-            // to be executed; however, this may not always be desired,
-            // as it may clog up the request queue should a user spam a
-            // command.
-            // if (!result.IsSuccess)
-            //     await context.Channel.SendMessageAsync(result.ErrorReason);
+            if (!result.IsSuccess)
+                 await context.Channel.SendMessageAsync(result.ErrorReason);
         }
     }
 }

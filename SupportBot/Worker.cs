@@ -77,6 +77,7 @@ namespace SupportBot
         /// Initializes a new instance of the <see cref="Worker"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
+        /// <param name="configuration"></param>
         public Worker(ILogger<Worker> logger, IConfiguration configuration)
         {
             _logger = logger;
@@ -107,7 +108,7 @@ namespace SupportBot
             {
                 await using var services = ConfigureServices();
                 DiscordSocket = services.GetRequiredService<DiscordSocketClient>();
-
+                
                 DiscordSocket.Log += Log;
 
                 await DiscordSocket.LoginAsync(TokenType.Bot, (string)Config.GetValue(typeof(string), "BotToken"));
@@ -258,7 +259,27 @@ namespace SupportBot
         /// <returns>Task.</returns>
         private Task Log(LogMessage msg)
         {
-            Console.WriteLine(msg.ToString());
+            switch (msg.Severity)
+            {
+                case LogSeverity.Critical:
+                    _logger.LogCritical(new EventId(600, msg.Source), msg.Exception, msg.Message);
+                    break;
+                case LogSeverity.Error:
+                    _logger.LogError(new EventId(500, msg.Source), msg.Exception, msg.Message);
+                    break;
+                case LogSeverity.Warning:
+                    _logger.LogWarning(new EventId(400, msg.Source), msg.Exception, msg.Message);
+                    break;
+                case LogSeverity.Verbose:
+                    _logger.LogTrace(new EventId(300, msg.Source), msg.Exception, msg.Message);
+                    break;
+                case LogSeverity.Debug:
+                    _logger.LogDebug(new EventId(200, msg.Source), msg.Exception, msg.Message);
+                    break;
+                default:
+                    _logger.LogInformation(new EventId(100, msg.Source), msg.Exception, msg.Message);
+                    break;
+            }
             return Task.CompletedTask;
         }
 

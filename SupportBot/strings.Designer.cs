@@ -91,6 +91,30 @@ namespace SupportBot {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to **Command List**
+        ///Builds a chown command
+        ///`#cb chown [username]`
+        ///
+        ///Link to the WSL 
+        ///`#wsl` 
+        ///
+        ///Explain how to resize LVM storage
+        ///`#lvmsize`
+        ///
+        ///Checks with steam to see what it can see
+        ///`#check-steam [address]`
+        ///
+        ///Checks to see if a port is open
+        ///`#check-port [address] [port] [(tcp/udp)]`
+        ///UDP checking is not reliable, if it says Closed, something is specifically responding (Firewall). A TimeOut is expected output for UDP normally..
+        /// </summary>
+        internal static string Help {
+            get {
+                return ResourceManager.GetString("Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to **Logical Volume Manager (LVM)**
         ///It looks like you are using LVM, if this is a virtual machine you probably need to expand the drive as most installations initially only assign a small amount.
         ///
