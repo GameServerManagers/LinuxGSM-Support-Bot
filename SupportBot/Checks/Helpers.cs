@@ -1,4 +1,18 @@
-﻿using System;
+﻿// ***********************************************************************
+// Assembly         : SupportBot
+// Author           : Nathan Pipes
+// Created          : 02-23-2021
+//
+// Last Modified By : Nathan Pipes
+// Last Modified On : 02-27-2021
+// ***********************************************************************
+// <copyright file="Helpers.cs" company="NPipes">
+//     Copyright (c) NPipes. All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,10 +29,8 @@ namespace SupportBot.Checks
         /// </summary>
         /// <param name="host">IP-Address or host name to check for the port.</param>
         /// <param name="port">The port-number to check.</param>
-        /// <param name="timeoutSeconds">
-        /// The timeoutSeconds in seconds to wait for a reply. Defaults to 2 because 1 second is
-        /// mostly too short for .NET.
-        /// </param>
+        /// <param name="timeoutSeconds">The timeoutSeconds in seconds to wait for a reply. Defaults to 2 because 1 second is
+        /// mostly too short for .NET.</param>
         /// <param name="useUdp"><c>true</c> if a UDP port should be checked.</param>
         /// <returns>The result of the operation.</returns>
         public static PortState GetPortState(string host, int port, int timeoutSeconds = 2, bool useUdp = false)
@@ -154,18 +166,48 @@ namespace SupportBot.Checks
             
             return outerResult;
         }
+
+        /// <summary>
+        /// Checks if the IP address valid.
+        /// </summary>
+        /// <param name="strIp">The IP address to check</param>
+        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+        public static bool CheckIpValid(string strIp)
+        {
+            return !string.IsNullOrEmpty(strIp) && IPAddress.TryParse(strIp, out _);
+        }
     }
 
+    /// <summary>
+    /// Defines all the possible port states
+    /// </summary>
     public enum PortState
     {
+        /// <summary>
+        /// Unknown port state
+        /// </summary>
         Unknown = 0,
 
+        /// <summary>
+        /// The port is open
+        /// </summary>
         Open = 1,
 
+        /// <summary>
+        /// The port is closed
+        /// </summary>
         Closed = 2,
 
+        /// <summary>
+        /// Timeout trying to reach the port
+        /// </summary>
         TimedOut = 3,
 
+        /// <summary>
+        /// Connection refused.
+        /// </summary>
         Refused = 4
     }
+    
+    
 }

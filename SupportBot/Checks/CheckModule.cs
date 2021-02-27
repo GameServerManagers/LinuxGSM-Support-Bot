@@ -1,4 +1,17 @@
-﻿using System;
+﻿// ***********************************************************************
+// Assembly         : SupportBot
+// Author           : Nathan Pipes
+// Created          : 02-22-2021
+//
+// Last Modified By : Nathan Pipes
+// Last Modified On : 02-27-2021
+// ***********************************************************************
+// <copyright file="CheckModule.cs" company="NPipes">
+//     Copyright (c) NPipes. All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
 using Discord.Commands;
 using System.Net;
 using System.Text.Json;
@@ -8,13 +21,37 @@ using System.Text;
 
 namespace SupportBot.Checks
 {
+    /// <summary>
+    /// Defines all the check commands
+    /// Implements the <see cref="Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}" />
+    /// </summary>
+    /// <seealso cref="Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}" />
     public class CheckModule : ModuleBase<SocketCommandContext>
     {
+        /// <summary>
+        /// Checks steam to see what servers are running.
+        /// </summary>
+        /// <param name="address">The address.</param>
+        /// <returns>Task.</returns>
         [Command("check-steam")]
         public Task CheckSteam([Remainder][Summary("The server ip address or FQDN to check")] string address)
         {
             try
-            {
+            {                
+                var sb = new StringBuilder();
+                
+                if (!Helpers.CheckIpValid(address))
+                {
+                    var entries = Dns.GetHostAddresses(address);
+                    if (entries.Length > 1)
+                    {
+                        sb.Append("Multiple addresses found for this host, only the first is checked");
+                    }
+                    
+                    //Set the address to the resolved IP.
+                    address = entries[0].ToString();
+                }
+
                 using var webClient = new WebClient();
                 var result = JsonSerializer.Deserialize<SteamAPIResponse>(webClient.DownloadString($"https://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr={address}"));
 
@@ -22,7 +59,6 @@ namespace SupportBot.Checks
                 {
                     var totalServers = result.response.servers.Length;
 
-                    var sb = new StringBuilder();
                     sb.Append("Steam can see the following:\n");
 
                     foreach (var item in result.response.servers)
@@ -46,8 +82,15 @@ namespace SupportBot.Checks
 
             return ReplyAsync("Unable to check with steam, sorry about that.");
         }
-        
-                [Command("check-port")]
+
+        /// <summary>
+        /// Checks status of the port.
+        /// </summary>
+        /// <param name="address">The address.</param>
+        /// <param name="port">The port.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>Task.</returns>
+        [Command("check-port")]
         public Task CheckPort(
             [Summary("The server ip address or FQDN to check")] string address,
             [Summary("port to check")] int port,

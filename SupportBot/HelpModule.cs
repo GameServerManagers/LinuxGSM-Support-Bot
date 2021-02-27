@@ -12,11 +12,7 @@
 // <summary></summary>
 // ***********************************************************************
 
-using System;
 using Discord.Commands;
-using SupportBot.Triggers;
-using System.Net;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 
