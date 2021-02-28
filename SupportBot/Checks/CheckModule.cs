@@ -23,9 +23,13 @@ namespace SupportBot.Checks
 {
     /// <summary>
     /// Defines all the check commands
-    /// Implements the <see cref="Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}" />
+    /// Implements the <see>
+    ///     <cref>Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}</cref>
+    /// </see>
     /// </summary>
-    /// <seealso cref="Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}" />
+    /// <seealso>
+    ///     <cref>Discord.Commands.ModuleBase{Discord.Commands.SocketCommandContext}</cref>
+    /// </seealso>
     public class CheckModule : ModuleBase<SocketCommandContext>
     {
         /// <summary>
@@ -36,6 +40,8 @@ namespace SupportBot.Checks
         [Command("check-steam")]
         public Task CheckSteam([Remainder][Summary("The server ip address or FQDN to check")] string address)
         {
+            Context.Message.DeleteAsync();
+            
             try
             {                
                 var sb = new StringBuilder();
@@ -55,28 +61,25 @@ namespace SupportBot.Checks
                 using var webClient = new WebClient();
                 var result = JsonSerializer.Deserialize<SteamAPIResponse>(webClient.DownloadString($"https://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr={address}"));
 
-                if (result.response.success)
+                if (!result.response.success) return ReplyAsync("Steam API resulted in a failure. Try again later.");
+                
+                var totalServers = result.response.servers.Length;
+
+                sb.Append("Steam can see the following:\n");
+
+                foreach (var item in result.response.servers)
                 {
-                    var totalServers = result.response.servers.Length;
-
-                    sb.Append("Steam can see the following:\n");
-
-                    foreach (var item in result.response.servers)
-                    {
-                        sb.Append($"**{item.gamedir}**\nApp ID: {item.appid}\nIs Secure: {item.secure}\nIs Lan:{item.lan}\nGame Port:{item.gameport}\nSpec Port:{item.specport}\n");
-                    }
-
-                    sb.Append($"Total Servers: {totalServers}");
-
-                    return ReplyAsync(sb.ToString());
+                    sb.Append($"**{item.gamedir}**\nApp ID: {item.appid}\nIs Secure: {item.secure}\nIs Lan:{item.lan}\nGame Port:{item.gameport}\nSpec Port:{item.specport}\n");
                 }
-                else
-                {
-                    return ReplyAsync("Steam API resulted in a failure. Try again later.");
-                }
+
+                sb.Append($"Total Servers: {totalServers}");
+
+                return ReplyAsync(sb.ToString());
+
             }
             catch (Exception)
             {
+                Console.WriteLine("ERROR!");
                 // ignored
             }
 
@@ -96,9 +99,11 @@ namespace SupportBot.Checks
             [Summary("port to check")] int port,
             [Summary("Specify either: `tcp` or `udp`")] string type)
         {
+            Context.Message.DeleteAsync();
+            
             var result = Helpers.GetPortState(address, port, 2, type.ToLower() == "udp");
            
-            return ReplyAsync($"{address} {port}/{type}: {Enum.GetName(result)}");
+            return ReplyAsync($"{port}/{type}: {Enum.GetName(result)}");
         }
     }
 }

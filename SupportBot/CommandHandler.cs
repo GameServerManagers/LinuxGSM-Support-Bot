@@ -15,9 +15,11 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Discord;
 
 namespace SupportBot
 {
@@ -46,10 +48,18 @@ namespace SupportBot
         public CommandHandler(IServiceProvider services)
         {
             _commands = services.GetRequiredService<CommandService>();
+            _commands.Log += CommandsOnLog;
             _client = services.GetRequiredService<DiscordSocketClient>();
             _services = services;
         }
 
+        private Task CommandsOnLog(LogMessage arg)
+        {
+            File.AppendAllText("commands.log", arg.ToString());
+
+            return Task.FromResult(true);
+        }
+        
         /// <summary>
         /// install commands as an asynchronous operation.
         /// </summary>
@@ -94,8 +104,8 @@ namespace SupportBot
                 argPos,
                 null);
 
-            if (!result.IsSuccess)
-                 await context.Channel.SendMessageAsync(result.ErrorReason);
+            //if (!result.IsSuccess)
+            //     await context.Channel.SendMessageAsync(result.ErrorReason);
         }
     }
 }
