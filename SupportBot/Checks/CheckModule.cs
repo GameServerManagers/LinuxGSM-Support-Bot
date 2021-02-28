@@ -79,7 +79,6 @@ namespace SupportBot.Checks
             }
             catch (Exception)
             {
-                Console.WriteLine("ERROR!");
                 // ignored
             }
 
