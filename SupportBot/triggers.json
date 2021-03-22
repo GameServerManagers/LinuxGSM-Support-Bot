@@ -161,6 +161,20 @@
         }
       ],
       "Answer": "https://docs.linuxgsm.com/commands/mods"
+    },
+    {
+      "Name": "Steam Guard",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "account using steam guard"
+        },
+        {
+          "Type": "simple",
+          "Value": "steam guard code"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/steamcmd#steam-guard"
     }
   ]
 }
