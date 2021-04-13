@@ -175,6 +175,28 @@
         }
       ],
       "Answer": "https://docs.linuxgsm.com/steamcmd#steam-guard"
+    },
+    {
+      "Name": "Backups",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "i create a backup"
+        },
+        {
+          "Type": "simple",
+          "Value": "i create backups"
+        },
+        {
+          "Type": "simple",
+          "Value": "i schedule backup"
+        },
+        {
+          "Type": "simple",
+          "Value": "i schedule a backup"
+        }
+      ],
+      "Answer": "https://docs.linuxgsm.com/commands/backup"
     }
   ]
 }
