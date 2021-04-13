@@ -108,7 +108,7 @@ namespace SupportBot
             {
                 await using var services = ConfigureServices();
                 DiscordSocket = services.GetRequiredService<DiscordSocketClient>();
-                
+
                 DiscordSocket.Log += Log;
 
                 await DiscordSocket.LoginAsync(TokenType.Bot, (string)Config.GetValue(typeof(string), "BotToken"));
@@ -131,7 +131,7 @@ namespace SupportBot
                 var triggers = System.Text.Json.JsonSerializer.Deserialize<BotTrigger>(client.DownloadString(
                     "https://raw.githubusercontent.com/Grimston/LGSM-SupportBot/master/SupportBot/triggers.json"));
                 if (triggers == null) return;
-                
+
                 var triggerCollection = Database.GetCollection<Trigger>();
                 triggerCollection.DeleteAll(); //Remove everything
                 triggerCollection.InsertBulk(triggers.Triggers);
@@ -196,25 +196,31 @@ namespace SupportBot
                     {
                         //Ignore it, probably something wrong with the regex..
                     }
+
+                    if (canHandle)
+                    {
+                        break;
+                    }
                 }
 
-                if(canHandle)
+                if (canHandle)
                 {
                     availableTriggers.Add(item);
                 }
             }
 
-            if(availableTriggers.Count != 0)
+            if (availableTriggers.Count != 0)
             {
-                if(availableTriggers.Count > 1)
+                if (availableTriggers.Count > 1)
                 {
                     var combinedAnswers = availableTriggers.Aggregate(
-                        "Multiple potential issues found, all answers found:\n", 
+                        "Multiple potential issues found, all answers found:\n",
                         (current, item) => current + $"{item.Answer}\n"
                         );
 
                     await message.Channel.SendMessageAsync(combinedAnswers);
-                } else
+                }
+                else
                 {
                     await message.Channel.SendMessageAsync(availableTriggers[0].Answer);
                 }
