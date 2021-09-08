@@ -197,6 +197,28 @@
         }
       ],
       "Answer": "https://docs.linuxgsm.com/commands/backup"
+    },
+    {
+      "Name": "FTP",
+      "Starters": [
+        {
+          "Type": "simple",
+          "Value": "connect to ftp"
+        },
+        {
+          "Type": "simple",
+          "Value": "connect using ftp"
+        },
+        {
+          "Type": "simple",
+          "Value": "upload using ftp"
+        },
+        {
+          "Type": "simple",
+          "Value": "upload via ftp"
+        }
+      ],
+      "Answer": "FTP is not recommended, please use SFTP instead: https://docs.linuxgsm.com/linux/ftp-scp\n\nSince you are probably using Windows, there are many options for this, such as: \n<https://www.bitvise.com/ssh-client> (Doubles up as an SSH client, and even attempts to fix ownership issues if you make that mistake)\n<https://filezilla-project.org> (You need to use the Connection Manager and select SFTP)"
     }
   ]
 }
