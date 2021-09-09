@@ -50,7 +50,7 @@ namespace SupportBot
         /// </summary>
         /// <returns>Task.</returns>
         [Command("wsl")]
-        public Task WSL()
+        public Task Wsl()
         {
             return ReplyAsync(strings.Wsl);
         }

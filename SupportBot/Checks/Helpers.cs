@@ -4,18 +4,22 @@
 // Created          : 02-23-2021
 //
 // Last Modified By : Nathan Pipes
-// Last Modified On : 02-27-2021
+// Last Modified On : 09-08-2021
 // ***********************************************************************
 // <copyright file="Helpers.cs" company="NPipes">
 //     Copyright (c) NPipes. All rights reserved.
 // </copyright>
 // <summary></summary>
 // ***********************************************************************
+
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using SupportBot.Checks.Modal;
 
 namespace SupportBot.Checks
 {
@@ -24,6 +28,64 @@ namespace SupportBot.Checks
     /// </summary>
     public class Helpers
     {
+        /// <summary>
+        /// Checks using the Steam Public API what is currently running on the specified server
+        /// </summary>
+        /// <param name="address">The hostname or IP of the server to check</param>
+        /// <returns>List of servers running, or an error message</returns>
+        public static async Task<string> CheckSteam(string address)
+        {
+            try
+            {
+                var sb = new StringBuilder();
+
+                if (!Helpers.CheckIpValid(address))
+                {
+                    var entries = await Dns.GetHostAddressesAsync(address);
+                    if (entries.Length > 1)
+                    {
+                        sb.Append(
+                            "Multiple addresses found for this host, only the first is checked, please specify the IP you want to check next time.\n");
+                    }
+
+                    //Set the address to the resolved IP.
+                    address = entries[0].ToString();
+                }
+
+                using var webClient = new WebClient();
+                //We are not using Async here as this will cause the method to hang the entire Task.
+                var result = JsonSerializer.Deserialize<SteamApiResponse>(
+                    webClient.DownloadString(
+                        $"https://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr={address}"));
+
+                if (result == null || !result.response.success)
+                {
+                    return await Task.FromResult("Steam API resulted in a failure. Try again later.");
+                }
+
+                var totalServers = result.response.servers.Length;
+
+                sb.Append("Steam can see the following:\n");
+
+                foreach (var item in result.response.servers)
+                {
+                    sb.Append(
+                        $"**{item.gamedir}**\nApp ID: {item.appid}\nIs Secure: {item.secure}\nIs Lan:{item.lan}\nGame Port:{item.gameport}\nSpec Port:{item.specport}\n");
+                }
+
+                sb.Append($"Total Servers: {totalServers}");
+
+                var response = sb.ToString();
+                return await Task.FromResult(response);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return await Task.FromResult("Unable to check with steam, sorry about that.");
+        }
+
         /// <summary>
         /// Tries to open a network connection to a specific port retrieving the result.
         /// </summary>
@@ -55,7 +117,8 @@ namespace SupportBot.Checks
                                 var waitHandle = asyncResult.AsyncWaitHandle;
                                 try
                                 {
-                                    if (asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(timeoutSeconds), false))
+                                    if (asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(timeoutSeconds),
+                                        false))
                                     {
                                         // The result was positive
                                         if (!asyncResult.IsCompleted)
@@ -67,6 +130,7 @@ namespace SupportBot.Checks
                                             result = client.Connected ? PortState.Open : PortState.Closed;
                                         }
                                     }
+
                                     // ensure the ending-call
                                     client.EndConnect(asyncResult);
                                 }
@@ -79,15 +143,12 @@ namespace SupportBot.Checks
                             catch (SocketException sockEx)
                             {
                                 // see https://msdn.microsoft.com/en-us/library/ms740668.aspx for a list of all states
-                                switch (sockEx.NativeErrorCode)
+                                result = sockEx.NativeErrorCode switch
                                 {
-                                    case 10060:
-                                        result = PortState.TimedOut;
-                                        break;
-                                    case 10061:
-                                        result = PortState.Refused;
-                                        break;
-                                }
+                                    10060 => PortState.TimedOut,
+                                    10061 => PortState.Refused,
+                                    _ => result
+                                };
                             }
                             catch (Exception)
                             {
@@ -107,15 +168,14 @@ namespace SupportBot.Checks
                             {
                                 client.Connect(host, port);
                                 var asyncResult = client.BeginReceive(
-                                    _ =>
-                                    {
-                                    },
+                                    _ => { },
                                     null);
                                 asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(timeoutSeconds), false);
                                 if (!asyncResult.IsCompleted)
                                 {
                                     return PortState.TimedOut;
                                 }
+
                                 result = PortState.Open;
                             }
                             catch (SocketException sockEx)
@@ -138,6 +198,7 @@ namespace SupportBot.Checks
                                 client.Close();
                             }
                         }
+
                         return result;
                     },
                     token).ContinueWith(
@@ -147,6 +208,7 @@ namespace SupportBot.Checks
                         {
                             return PortState.TimedOut;
                         }
+
                         return t.Result;
                     },
                     token).Result;
@@ -163,7 +225,7 @@ namespace SupportBot.Checks
             {
                 // empty catch
             }
-            
+
             return outerResult;
         }
 
@@ -208,6 +270,4 @@ namespace SupportBot.Checks
         /// </summary>
         Refused = 4
     }
-    
-    
 }

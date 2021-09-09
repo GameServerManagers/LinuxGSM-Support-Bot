@@ -53,7 +53,7 @@ namespace SupportBot
             _services = services;
         }
 
-        private Task CommandsOnLog(LogMessage arg)
+        private static Task CommandsOnLog(LogMessage arg)
         {
             File.AppendAllText("commands.log", arg.ToString());
 
@@ -76,7 +76,7 @@ namespace SupportBot
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
-            if (!(messageParam is SocketUserMessage message)) return;
+            if (messageParam is not SocketUserMessage message) return;
 
             if (!Worker.Settings.AllowedChannels.Contains(message.Channel.Id))
             {

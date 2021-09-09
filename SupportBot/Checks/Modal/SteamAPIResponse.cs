@@ -16,7 +16,7 @@ namespace SupportBot.Checks.Modal
     /// <summary>
     /// Steam API root node.
     /// </summary>
-    public class SteamAPIResponse
+    public class SteamApiResponse
     {
         /// <summary>
         /// Gets or sets the response.
