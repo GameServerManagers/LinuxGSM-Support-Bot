@@ -11,7 +11,7 @@
 // </copyright>
 // <summary></summary>
 // ***********************************************************************
-namespace SupportBot.Checks.Modal
+namespace SupportBot.Modules.Modal
 {
     /// <summary>
     /// Steam API Server Response.

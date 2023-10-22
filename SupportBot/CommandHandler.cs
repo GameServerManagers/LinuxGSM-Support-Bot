@@ -1,17 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : SupportBot
-// Author           : Nathan Pipes
-// Created          : 01-24-2020
-//
-// Last Modified By : Nathan Pipes
-// Last Modified On : 02-23-2021
-// ***********************************************************************
-// <copyright file="CommandHandler.cs" company="NPipes">
-//     Copyright (c) NPipes. All rights reserved.
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
+using SupportBot.Services;
 
 namespace SupportBot
 {
@@ -28,6 +16,9 @@ namespace SupportBot
     /// </summary>
     public class CommandHandler
     {
+        private readonly DatabaseService _databaseService;
+        private readonly IServiceProvider _serviceProvider;
+
         /// <summary>
         /// The client
         /// </summary>
@@ -36,21 +27,18 @@ namespace SupportBot
         /// The commands
         /// </summary>
         private readonly CommandService _commands;
-        /// <summary>
-        /// The services
-        /// </summary>
-        private readonly IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandHandler"/> class.
         /// </summary>
         /// <param name="services">The services.</param>
-        public CommandHandler(IServiceProvider services)
+        public CommandHandler(DiscordSocketClient client, CommandService commands, DatabaseService databaseService, IServiceProvider serviceProvider)
         {
-            _commands = services.GetRequiredService<CommandService>();
+            _databaseService = databaseService;
+            _serviceProvider = serviceProvider;
+            _commands = commands;
             _commands.Log += CommandsOnLog;
-            _client = services.GetRequiredService<DiscordSocketClient>();
-            _services = services;
+            _client = client;
         }
 
         private static Task CommandsOnLog(LogMessage arg)
@@ -66,7 +54,7 @@ namespace SupportBot
         public async Task InstallCommandsAsync()
         {
             _client.MessageReceived += HandleCommandAsync;
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         }
 
         /// <summary>
@@ -78,7 +66,7 @@ namespace SupportBot
             // Don't process the command if it was a system message
             if (messageParam is not SocketUserMessage message) return;
 
-            if (!Worker.Settings.AllowedChannels.Contains(message.Channel.Id))
+            if (!_databaseService.GetSettings().AllowedChannels.Contains(message.Channel.Id))
             {
                 return;
             }

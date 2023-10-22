@@ -1,17 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : SupportBot
-// Author           : Nathan Pipes
-// Created          : 02-20-2021
-//
-// Last Modified By : Nathan Pipes
-// Last Modified On : 02-20-2021
-// ***********************************************************************
-// <copyright file="Trigger.cs" company="NPipes">
-//     Copyright (c) NPipes. All rights reserved.
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SupportBot.Triggers
 {

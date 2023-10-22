@@ -14,27 +14,20 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
-using Discord.Net;
+using Discord.Commands.Builders;
 using Discord.WebSocket;
-using LiteDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SupportBot.Checks;
 using SupportBot.Data;
+using SupportBot.Services;
 using SupportBot.Triggers;
 
 namespace SupportBot
@@ -51,29 +44,15 @@ namespace SupportBot
         /// </summary>
         private readonly ILogger<Worker> _logger;
 
-        /// <summary>
-        /// Gets or sets the database.
-        /// </summary>
-        /// <value>The database.</value>
-        private static LiteDatabase Database { get; set; }
-
-        /// <summary>
-        /// Gets or sets the settings.
-        /// </summary>
-        /// <value>The settings.</value>
-        public static BotSettings Settings { get; set; }
+        private readonly DatabaseService _databaseService;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Gets or sets the discord socket.
         /// </summary>
         /// <value>The discord socket.</value>
         private DiscordSocketClient DiscordSocket { get; set; }
-
-        /// <summary>
-        /// The application path
-        /// </summary>
-        private readonly string _appPath;
-
+        
         private IConfiguration Config { get; set; }
 
         /// <summary>
@@ -81,21 +60,23 @@ namespace SupportBot
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="configuration"></param>
-        public Worker(ILogger<Worker> logger, IConfiguration configuration)
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, DatabaseService databaseService, DiscordSocketClient client, IServiceProvider serviceProvider)
         {
             _logger = logger;
+            _databaseService = databaseService;
+            _serviceProvider = serviceProvider;
             Config = configuration;
+            DiscordSocket = client;
 
-            _appPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) : "/srv/LinuxGSMbot/LinuxGSMbot";
-
-            Database = new LiteDatabase(Path.Combine(_appPath ?? throw new InvalidOperationException(), "bot.db"));
-            var settingStorage = Database.GetCollection<BotSettings>("settings");
+            var settingStorage = _databaseService.Settings();
             if (settingStorage.Count() == 0)
             {
                 //The defaults here are the support channels (from 2020)
                 settingStorage.Insert(new BotSettings() { Name = "LinuxGSM Support Bot", AllowedChannels = new ulong[] { 140667754586832896, 135126471319617536, 425089610477993984, 424152809970204672, 219535041468956673 } });
             }
-            Settings = settingStorage.FindAll().OrderBy(x => x.Id).Last();
+
+            //Clean old checks out.
+            _databaseService.SteamChecks().DeleteAll();
 
             UpdateTriggers();
         }
@@ -109,122 +90,24 @@ namespace SupportBot
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await using var services = ConfigureServices();
-                DiscordSocket = services.GetRequiredService<DiscordSocketClient>();
-                DiscordSocket.Ready += Client_Ready;
-
                 DiscordSocket.Log += Log;
-
-                await DiscordSocket.LoginAsync(TokenType.Bot, (string)Config.GetValue(typeof(string), "BotToken"));
-                await DiscordSocket.StartAsync();
-
-                await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
-
-                DiscordSocket.InteractionCreated += Client_InteractionCreated;
+                
+                // Here we can initialize the service that will register and execute our commands
+                await _serviceProvider.GetRequiredService<InteractionHandler>()
+                    .InitializeAsync();
                 
                 DiscordSocket.MessageReceived += MessageReceived;
 
+                
+                await DiscordSocket.LoginAsync(TokenType.Bot, (string)Config.GetValue(typeof(string), "BotToken"));
+                await DiscordSocket.StartAsync();
+
+                
                 await Task.Delay(-1, stoppingToken);
-                Database.Dispose();
             }
         }
 
-        private async Task Client_Ready()
-        {
-            await RefreshSlashCommands();
-        }
-
-        public async Task RefreshSlashCommands()
-        {
-            try
-            {
-                await DiscordSocket.Rest.CreateGlobalCommand(new SlashCommandBuilder().WithName("help").WithDescription("Returns a list of commands").Build());
-                await DiscordSocket.Rest.CreateGlobalCommand(new SlashCommandBuilder().WithName("wsl").WithDescription("Shows information regarding WSL").Build());
-                await DiscordSocket.Rest.CreateGlobalCommand(new SlashCommandBuilder().WithName("lvm-resize").WithDescription("Explain how to resize LVM storage").Build());
-                await DiscordSocket.Rest.CreateGlobalCommand(new SlashCommandBuilder().WithName("check")
-                    .WithDescription("Checks steam or ports")
-                    .AddOption(new SlashCommandOptionBuilder()
-                        .WithName("steam")
-                        .WithDescription("Checks with steam to see what it can see")
-                        .AddOption("address", ApplicationCommandOptionType.String, "The server IP/Hostname to check")
-                        .WithType(ApplicationCommandOptionType.SubCommand)
-                    ).AddOption(new SlashCommandOptionBuilder()
-                        .WithName("port")
-                        .WithDescription("Checks if a port is open")
-                        .AddOption("address", ApplicationCommandOptionType.String, "The server IP/Hostname to check")
-                        .AddOption("port", ApplicationCommandOptionType.Integer, "The port to check")
-                        .AddOption(new SlashCommandOptionBuilder()
-                            .WithName("type")
-                            .WithDescription("Protocol to check")
-                            .WithRequired(true)
-                            .AddChoice("TCP", "tcp")
-                            .AddChoice("UDP", "udp")
-                            .WithType(ApplicationCommandOptionType.String)
-                        ).WithType(ApplicationCommandOptionType.SubCommand)
-                    ).Build());
-            }
-            catch(ApplicationCommandException exception)
-            {
-                var json = JsonConvert.SerializeObject(exception.Error, Formatting.Indented);
-                Console.WriteLine(json);
-            }
-        }
-
-        private async Task Client_InteractionCreated(SocketInteraction interaction)
-        {
-            // Checking the type of this interaction
-            switch (interaction)
-            {
-                // Slash commands
-                case SocketSlashCommand commandInteraction:
-                    await BotSlashCommandHandler(commandInteraction);
-                    break;
-            }
-        }
-        
-        private async Task BotSlashCommandHandler(SocketSlashCommand command)
-        {
-            switch (command.Data.Name.ToLower())
-            {
-                case "help":
-                    await command.RespondAsync(strings.Help, ephemeral: true);
-                    return;
-                case "wsl":
-                    await command.RespondAsync(strings.Wsl);
-                    return;
-                case "lvm-resize":
-                    await command.RespondAsync(strings.LvmPartitions);
-                    return;
-                case "check":
-                    var dataOption = command.Data.Options.First();
-                    if (dataOption.Name == "steam")
-                    {
-                        var address = Convert.ToString(dataOption.Options.Single(x => x.Name == "address").Value);
-                        var response = await Helpers.CheckSteam(address);
-                        foreach (var output in response.Split(2048))
-                        {
-                            await command.RespondAsync(output, ephemeral: true);
-                        }
-                    }
-                    else
-                    {
-                        //Port
-                        var address = Convert.ToString(dataOption.Options.Single(x => x.Name == "address").Value);
-                        var port = Convert.ToInt32(dataOption.Options.Single(x => x.Name == "port").Value);
-                        var type = Convert.ToString(dataOption.Options.Single(x => x.Name == "type").Value);
-                        
-                        var result = Helpers.GetPortState(address, port, 2, type.ToLower() == "udp");
-
-                        await command.RespondAsync($"{port}/{type}: {Enum.GetName(result)}", ephemeral: true);
-                    }
-                    return;
-                default:
-                    await command.RespondAsync($"You executed \"{command.Data.Name}\" and yet... I don't know what to do.");
-                    return;
-            }
-        }
-
-        public static void UpdateTriggers()
+        public void UpdateTriggers()
         {
             try
             {
@@ -233,7 +116,7 @@ namespace SupportBot
                     "https://raw.githubusercontent.com/Grimston/LGSM-SupportBot/master/SupportBot/triggers.json"));
                 if (triggers == null) return;
 
-                var triggerCollection = Database.GetCollection<Trigger>();
+                var triggerCollection = _databaseService.Triggers();
                 triggerCollection.DeleteAll(); //Remove everything
                 triggerCollection.InsertBulk(triggers.Triggers);
             }
@@ -245,7 +128,7 @@ namespace SupportBot
         }
 
         /// <summary>
-        /// Handles all received messages.
+        /// Handles all received messages. (Triggers)
         /// </summary>
         /// <param name="message">The message.</param>
         private async Task MessageReceived(SocketMessage message)
@@ -255,7 +138,7 @@ namespace SupportBot
                 return;
             }
 
-            if (!Settings.AllowedChannels.Contains(message.Channel.Id))
+            if (!_databaseService.GetSettings().AllowedChannels.Contains(message.Channel.Id))
             {
                 return;
             }
@@ -280,7 +163,7 @@ namespace SupportBot
 
             var availableTriggers = new List<Trigger>();
 
-            foreach (var item in Database.GetCollection<Trigger>().FindAll())
+            foreach (var item in _databaseService.Triggers().FindAll())
             {
                 var canHandle = false;
                 foreach (var starter in item.Starters)
@@ -388,20 +271,6 @@ namespace SupportBot
                     break;
             }
             return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Configures services.
-        /// </summary>
-        /// <returns>ServiceProvider.</returns>
-        private ServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandler>()
-                .AddSingleton<HttpClient>()
-                .BuildServiceProvider();
         }
     }
 }

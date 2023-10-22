@@ -1,18 +1,4 @@
-﻿// ***********************************************************************
-// Assembly         : SupportBot
-// Author           : Grimston
-// Created          : 04-04-2020
-//
-// Last Modified By : Grimston
-// Last Modified On : 02-20-2021
-// ***********************************************************************
-// <copyright file="BotSettings.cs" company="NPipes">
-//     Copyright (c) NPipes. All rights reserved.
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-
-namespace SupportBot.Data
+﻿namespace SupportBot.Data
 {
     /// <summary>
     /// Class BotSettings.

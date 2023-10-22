@@ -1,27 +1,13 @@
-﻿// ***********************************************************************
-// Assembly         : SupportBot
-// Author           : Nathan Pipes
-// Created          : 02-23-2021
-//
-// Last Modified By : Nathan Pipes
-// Last Modified On : 09-08-2021
-// ***********************************************************************
-// <copyright file="Helpers.cs" company="NPipes">
-//     Copyright (c) NPipes. All rights reserved.
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-
-using System;
+﻿using System;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using SupportBot.Checks.Modal;
+using SupportBot.Modules.Modal;
 
-namespace SupportBot.Checks
+namespace SupportBot.Modules
 {
     /// <summary>
     /// Taken from the wonderful https://github.com/codingfreak/cfUtils library
@@ -32,58 +18,38 @@ namespace SupportBot.Checks
         /// Checks using the Steam Public API what is currently running on the specified server
         /// </summary>
         /// <param name="address">The hostname or IP of the server to check</param>
-        /// <returns>List of servers running, or an error message</returns>
-        public static async Task<string> CheckSteam(string address)
+        /// <returns>Response or null</returns>
+        public static async Task<Response> CheckSteam(string address)
         {
             try
             {
-                var sb = new StringBuilder();
-
-                if (!Helpers.CheckIpValid(address))
+                if (!CheckIpValid(address))
                 {
                     var entries = await Dns.GetHostAddressesAsync(address);
-                    if (entries.Length > 1)
-                    {
-                        sb.Append(
-                            "Multiple addresses found for this host, only the first is checked, please specify the IP you want to check next time.\n");
-                    }
-
-                    //Set the address to the resolved IP.
+                    //Set the address to the first resolved IP.
                     address = entries[0].ToString();
                 }
 
-                using var webClient = new WebClient();
+                using var webClient = new HttpClient();
                 //We are not using Async here as this will cause the method to hang the entire Task.
                 var result = JsonSerializer.Deserialize<SteamApiResponse>(
-                    webClient.DownloadString(
+                    await webClient.GetStringAsync(
                         $"https://api.steampowered.com/ISteamApps/GetServersAtAddress/v0001?addr={address}"));
 
                 if (result == null || !result.response.success)
                 {
-                    return await Task.FromResult("Steam API resulted in a failure. Try again later.");
+                    return null;
                 }
 
-                var totalServers = result.response.servers.Length;
-
-                sb.Append("Steam can see the following:\n");
-
-                foreach (var item in result.response.servers)
-                {
-                    sb.Append(
-                        $"**{item.gamedir}**\nApp ID: {item.appid}\nIs Secure: {item.secure}\nIs Lan:{item.lan}\nGame Port:{item.gameport}\nSpec Port:{item.specport}\n");
-                }
-
-                sb.Append($"Total Servers: {totalServers}");
-
-                var response = sb.ToString();
-                return await Task.FromResult(response);
+                return result.response;
             }
-            catch (Exception)
+            catch (Exception exc)
             {
+                Console.WriteLine(exc.ToString());
                 // ignored
             }
 
-            return await Task.FromResult("Unable to check with steam, sorry about that.");
+            return null;
         }
 
         /// <summary>
