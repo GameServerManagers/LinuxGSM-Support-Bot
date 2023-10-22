@@ -48,7 +48,8 @@ namespace SupportBot.Modules
                 var steamCollection = _databaseService.SteamChecks();
 
                 var embed = new EmbedBuilder();
-                embed.WithImageUrl($"https://cdn.cloudflare.steamstatic.com/steam/apps/{response.servers[0].appid}/header.jpg")
+                embed.WithImageUrl(
+                        $"https://cdn.cloudflare.steamstatic.com/steam/apps/{response.servers[0].appid}/header.jpg")
                     .AddField("Game", response.servers[0].gamedir, true)
                     .AddField("Address", response.servers[0].addr, true)
                     .AddField("App ID",
@@ -71,6 +72,7 @@ namespace SupportBot.Modules
                         menuBuilder.AddOption($"[{server.gamedir}]: {server.addr}", index.ToString(),
                             isDefault: 0 == index);
                     }
+
                     var builder = new ComponentBuilder()
                         .WithSelectMenu(menuBuilder);
 
@@ -91,6 +93,90 @@ namespace SupportBot.Modules
             }
         }
 
+        [SlashCommand("gamedig", "Runs a gamedig query on the specified server")]
+        public async Task GameDig(
+            [Choice("Valheim", "valheim")]
+            [Choice("Counter-Strike: Global Offensive", "csgo")]
+            [Choice("Counter-Strike 2", "cs2")]
+            [Choice("Project Zomboid", "przomboid")]
+            [Choice("Ark: Survival Evolved", "arkse")]
+            [Choice("Minecraft", "minecraft")]
+            [Choice("Teamspeak 3", "teamspeak3")]
+            [Choice("Rust", "rust")]
+            [Choice("7 Days to Die", "7d2d")]
+            [Choice("Minecraft: Bedrock Edition", "minecraftpe")]
+            [Choice("Garry's Mod", "garrysmod")]
+            [Choice("Team Fortress 2", "tf2")]
+            [Choice("Left 4 Dead 2 (2009)", "left4dead2")]
+            [Choice("Counter-Strike 1.6", "cs16")]
+            [Choice("Counter-Strike: Source", "css")]
+            [Choice("DayZ", "dayz")]
+            [Choice("Terraria", "terraria")]
+            [Choice("ARMA 3", "arma3")]
+            [Choice("Assetto Corsa", "assettocorsa")]
+            [Choice("Unreal Tournament", "ut")]
+            [Choice("Core Keeper", "corekeeper")]
+            [Choice("Insurgency: Sandstorm", "insurgencysandstorm")]
+            [Choice("Squad", "squad")]
+            [Choice("Insurgency", "insurgency")]
+            [Choice("Killing Floor 2", "killingfloor2")]
+            string type,
+            [Summary(description: "The server ip address or FQDN to check")]
+            string address)
+        {
+            await DeferAsync(true);
+
+            try
+            {
+                var result = await Helpers.GameDig(type, address);
+
+                var embed = new EmbedBuilder();
+
+                embed.WithTitle(result.name)
+                    .AddField("Map", result.map, true)
+                    .AddField("Players", $"{result.players.Length}/{result.maxplayers}", true)
+                    .AddField("Ping", result.ping, true)
+                    .WithFooter($"Connect {result.connect}")
+                    .WithColor(Color.Blue);
+
+                await FollowupAsync(embed: embed.Build(), ephemeral: true);
+            }
+            catch (Exception exc)
+            {
+                await FollowupAsync($"Error, please try again later: {exc}");
+            }
+        }
+        
+        [SlashCommand("gamedig2", "Runs a gamedig query on the specified server")]
+        public async Task GameDigType(
+            [Summary(description: "https://github.com/gamedig/node-gamedig/blob/HEAD/GAMES_LIST.md")]
+            string type,
+            [Summary(description: "The server ip address or FQDN to check")]
+            string address)
+        {
+            await DeferAsync(true);
+
+            try
+            {
+                var result = await Helpers.GameDig(type, address);
+
+                var embed = new EmbedBuilder();
+
+                embed.WithTitle(result.name)
+                    .AddField("Map", result.map, true)
+                    .AddField("Players", $"{result.players.Length}/{result.maxplayers}", true)
+                    .AddField("Ping", result.ping, true)
+                    .WithFooter($"Connect {result.connect}")
+                    .WithColor(Color.Blue);
+
+                await FollowupAsync(embed: embed.Build(), ephemeral: true);
+            }
+            catch (Exception exc)
+            {
+                await FollowupAsync($"Error, please try again later: {exc}");
+            }
+        }
+
         [ComponentInteraction("ss-s")]
         public async Task ProcessSteamCheckServerSelection(string[] selectedServer)
         {
@@ -98,10 +184,11 @@ namespace SupportBot.Modules
 
             var serverIndex = Convert.ToInt32(selectedServer[0]);
             var steamCollection = _databaseService.SteamChecks();
-            
+
             try
             {
-                var steamChecks = steamCollection.FindOne(x => x.Id == ((SocketMessageComponent)Context.Interaction).Message.Id);
+                var steamChecks =
+                    steamCollection.FindOne(x => x.Id == ((SocketMessageComponent)Context.Interaction).Message.Id);
 
                 var menuBuilder = new SelectMenuBuilder()
                     .WithPlaceholder("Select a server")
@@ -120,7 +207,8 @@ namespace SupportBot.Modules
 
                 var embed = new EmbedBuilder();
 
-                embed.WithImageUrl($"https://cdn.cloudflare.steamstatic.com/steam/apps/{steamChecks.SteamResponse.servers[serverIndex].appid}/header.jpg")
+                embed.WithImageUrl(
+                        $"https://cdn.cloudflare.steamstatic.com/steam/apps/{steamChecks.SteamResponse.servers[serverIndex].appid}/header.jpg")
                     .AddField("Game", steamChecks.SteamResponse.servers[serverIndex].gamedir, true)
                     .AddField("Address", steamChecks.SteamResponse.servers[serverIndex].addr, true)
                     .AddField("App ID",

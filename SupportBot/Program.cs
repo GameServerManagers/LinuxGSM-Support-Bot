@@ -1,17 +1,3 @@
-// ***********************************************************************
-// Assembly         : SupportBot
-// Author           : Grimston
-// Created          : 01-24-2020
-//
-// Last Modified By : Grimston
-// Last Modified On : 02-20-2021
-// ***********************************************************************
-// <copyright file="Program.cs" company="NPipes">
-//     Copyright (c) NPipes. All rights reserved.
-// </copyright>
-// <summary></summary>
-// ***********************************************************************
-
 using System.Net.Http;
 using System.Reflection;
 using Discord.Commands;
@@ -45,7 +31,15 @@ builder.Services.AddSingleton<InteractionHandler>();
 builder.Services.AddSingleton<DatabaseService>();
 builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
 builder.Services.AddHostedService<Worker>();
-            
+
+builder.Services.AddControllers();
+
 var app = builder.Build();
-            
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
 app.Run();

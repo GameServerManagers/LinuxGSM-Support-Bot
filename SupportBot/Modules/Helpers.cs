@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -51,6 +52,45 @@ namespace SupportBot.Modules
 
             return null;
         }
+        
+        /// <summary>
+        /// Makes a GameDig Query to the specified server.
+        /// </summary>
+        /// <param name="type">The game type for gamedig</param>
+        /// <param name="address">The hostname or IP of the server to check</param>
+        /// <returns>GameDigResult or null</returns>
+        public static async Task<GameDigResult> GameDig(string type, string address)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "npx",
+                    Arguments = $"gamedig --type {type} {address}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+
+                Process process = new Process { StartInfo = psi };
+                process.Start();
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                return JsonSerializer.Deserialize<GameDigResult>(output);
+                
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine(exc.ToString());
+                // ignored
+            }
+
+            return null;
+        }
+
+
+        
 
         /// <summary>
         /// Tries to open a network connection to a specific port retrieving the result.
